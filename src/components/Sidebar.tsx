@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useAppStore } from "@/lib/store";
+import { useAppStore, type Page } from "@/lib/store";
 
 const WORKSPACE: { label: string; page: Page }[] = [
   { label: "Home", page: "home" },

@@ -1,6 +1,5 @@
 import { useAppStore } from "@/lib/store";
 import { useEffect, useState } from "react";
-import { tauri } from "@/lib/tauri";
 import { Project } from "@/lib/models";
 
 const GENERATION_STATES = [
@@ -56,7 +55,7 @@ export default function AiPanel() {
 
       <div className="flex-1 overflow-y-auto p-4">
         {aiWorking ? (
-          <WorkingState text={stateText} agent={aiAgent} />
+          <WorkingState text={stateText} agent={aiAgent} summary={aiSummary} />
         ) : project ? (
           <Suggestions project={project} />
         ) : (
@@ -67,7 +66,7 @@ export default function AiPanel() {
   );
 }
 
-function WorkingState({ text, agent }: { text: string; agent: string | null }) {
+function WorkingState({ text, agent, summary }: { text: string; agent: string | null; summary: string | null }) {
   return (
     <div className="flex flex-col items-center py-8 text-center">
       <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-accent-soft">
@@ -78,6 +77,7 @@ function WorkingState({ text, agent }: { text: string; agent: string | null }) {
       </div>
       <p className="text-sm font-medium text-ink-900">{agent ?? "Agent"}</p>
       <p className="mt-1 text-xs text-ink-500">{text}</p>
+      {summary && <p className="mt-2 text-xs text-ink-400">{summary}</p>}
       <p className="mt-3 text-[11px] text-ink-400">
         No fake percentages — this is a best-effort status.
       </p>

@@ -176,7 +176,11 @@ export const useAppStore = create<AppState>()(
       };
     })(),
 
-    runAgent: async (api, run, req) => {
+    runAgent: async (
+      _api: TauriApi,
+      run: (req: any) => Promise<any>,
+      req: any
+    ) => {
       set({ aiWorking: true, aiAgent: "Agent", aiSummary: null });
       try {
         const res = await run(req);

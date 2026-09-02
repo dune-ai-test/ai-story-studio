@@ -1,5 +1,4 @@
 import { useAppStore } from "@/lib/store";
-import { useEffect } from "react";
 
 const ICONS: Record<string, string> = {
   info: "ℹ",

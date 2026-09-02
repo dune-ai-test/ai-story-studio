@@ -1,9 +1,27 @@
-# Tauri capability file — minimal permissions for the MVP.
-# fs scope is restricted to the app's data dir via tauri.conf.json.
-# dialog is used for open/save file prompts during export.
-# http is used for LLM API calls.
-
-version = "v1"
-
-[permissions]
-default = ["core", "fs:default", "dialog:default", "http:default"]
+{
+  "$schema": "https://schema.tauri.app/config/2/capability",
+  "identifier": "default",
+  "description": "Default permissions for the main window",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:default",
+    "core:window:allow-close",
+    "core:window:allow-minimize",
+    "core:window:allow-maximize",
+    "core:app:default",
+    "fs:default",
+    "fs:allow-exists",
+    "fs:allow-mkdir",
+    "fs:allow-read",
+    "fs:allow-readDir",
+    "fs:allow-write",
+    "fs:allow-remove",
+    "dialog:default",
+    "dialog:allow-open",
+    "dialog:allow-save",
+    "http:default",
+    "shell:default",
+    "store:default"
+  ]
+}

@@ -70,7 +70,7 @@ export default function ExportPage() {
         <div className="rounded-md border border-ink-100 p-4">
           <div className="text-sm font-semibold text-ink-900">PDF</div>
           <div className="mt-1 text-xs text-ink-500">.pdf — opens in any PDF reader. No external software needed.</div>
-          <Button variant="secondary" className="mt-3 w-full" onClick={() => doExport(p, "pdf")}>Download PDF</Button>
+          <Button variant="secondary" className="mt-3 w-full" onClick={() => doExport("pdf")}>Download PDF</Button>
         </div>
       </div>
 

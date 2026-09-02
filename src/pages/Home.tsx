@@ -1,6 +1,5 @@
 import { useProject } from "@/components/page-utils";
 import { Button } from "@/components/Button";
-import { type Project } from "@/lib/models";
 
 export default function HomePage() {
   const project = useProject();
@@ -20,7 +19,7 @@ export default function HomePage() {
   return (
     <div className="space-y-6">
       <HomeHeader project={project} />
-      <ProgressRow project={project} />
+      <ProgressRow />
       <ContinueCard />
       <TodayFocus />
       <Queue />

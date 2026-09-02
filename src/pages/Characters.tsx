@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { Button } from "@/components/Button";
+import { Project, type Character } from "@/lib/models";
 
 const FIELDS = [
   ["name", "Name"], ["role", "Role"], ["age", "Age"], ["appearance", "Appearance"],
@@ -28,21 +29,21 @@ export default function CharactersPage() {
     );
   }
 
-  function addCharacter() {
+  function addCharacter(p: Project) {
     const id = crypto.randomUUID();
     const updated = {
-      ...project,
-      characters: [...project.characters, { id, name: "New Character", role: null, age: null, appearance: null, personality: null, background: null, motivation: null, goal: null, fear: null, strengths: null, weaknesses: null, relationships: [], arc: null }],
+      ...p,
+      characters: [...p.characters, { id, name: "New Character", role: null, age: null, appearance: null, personality: null, background: null, motivation: null, goal: null, fear: null, strengths: null, weaknesses: null, relationships: [], arc: null }],
     };
     setProject(updated);
     autosave(updated);
     setSelected(id);
   }
 
-  function updateCharacter(id: string, field: string, value: string) {
+  function updateCharacter(p: Project, id: string, field: string, value: string) {
     const updated = {
-      ...project,
-      characters: project.characters.map((c) =>
+      ...p,
+      characters: p.characters.map((c) =>
         c.id === id ? { ...c, [field]: value } : c
       ),
     };
@@ -50,21 +51,21 @@ export default function CharactersPage() {
     autosave(updated);
   }
 
-  function deleteCharacter(id: string) {
+  function deleteCharacter(p: Project, id: string) {
     const updated = {
-      ...project,
-      characters: project.characters.filter((c) => c.id !== id),
+      ...p,
+      characters: p.characters.filter((c) => c.id !== id),
     };
     setProject(updated);
     autosave(updated);
     setSelected(null);
   }
 
-  function duplicateCharacter(id: string) {
-    const src = project.characters.find((c) => c.id === id);
+  function duplicateCharacter(p: Project, id: string) {
+    const src = p.characters.find((c) => c.id === id);
     if (!src) return;
     const copy = { ...src, id: crypto.randomUUID(), name: `${src.name} (copy)` };
-    const updated = { ...project, characters: [...project.characters, copy] };
+    const updated = { ...p, characters: [...p.characters, copy] };
     setProject(updated);
     autosave(updated);
     pushToast({ type: "success", message: "Character duplicated." });
@@ -80,7 +81,7 @@ export default function CharactersPage() {
           <p className="mt-1 text-sm text-ink-500">Create and refine the cast.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="secondary" onClick={addCharacter}>+ Add Character</Button>
+          <Button variant="secondary" onClick={() => addCharacter(project)}>+ Add Character</Button>
           <Button variant="secondary" onClick={() => pushToast({ type: "info", message: "Character Agent suggestions — coming soon with an LLM key." })}>Suggest Characters</Button>
         </div>
       </div>
@@ -103,14 +104,14 @@ export default function CharactersPage() {
                   {c.role && <span className="ml-2 text-xs text-ink-400">{c.role}</span>}
                 </button>
                 <button
-                  onClick={() => duplicateCharacter(c.id)}
+                  onClick={() => duplicateCharacter(project, c.id)}
                   className="px-1 py-1.5 text-xs text-ink-400 opacity-0 group-hover:opacity-100 hover:text-ink-700"
                   title="Duplicate"
                 >
                   Duplicate
                 </button>
                 <button
-                  onClick={() => deleteCharacter(c.id)}
+                  onClick={() => deleteCharacter(project, c.id)}
                   className="px-1 py-1.5 text-xs text-red-600 opacity-0 group-hover:opacity-100 hover:bg-red-50"
                   title="Delete"
                 >
@@ -128,8 +129,8 @@ export default function CharactersPage() {
           {selectedChar ? (
             <CharacterEditor
               character={selectedChar}
-              onChange={(f, v) => updateCharacter(selectedChar.id, f, v)}
-              onDelete={() => deleteCharacter(selectedChar.id)}
+              onChange={(f, v) => updateCharacter(project, selectedChar.id, f, v)}
+              onDelete={() => deleteCharacter(project, selectedChar.id)}
             />
           ) : (
             <div className="flex h-full items-center justify-center rounded-md border border-dashed border-ink-200 p-12 text-center text-sm text-ink-400">

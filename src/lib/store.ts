@@ -63,7 +63,11 @@ interface AppState {
   loadProject: (id: string) => Promise<Project>;
   saveProject: (p: Project) => Promise<void>;
   autosave: (p: Project) => void;
-  runAgent: (api: TauriApi, req: any) => Promise<any>;
+  runAgent: (
+      api: TauriApi,
+      run: (req: any) => Promise<any>,
+      req: any
+    ) => Promise<any>;
 }
 
 export interface Toast {

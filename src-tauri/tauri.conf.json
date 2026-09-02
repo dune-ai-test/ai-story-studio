@@ -25,7 +25,8 @@
   "bundle": {
     "active": true,
     "targets": {
-      "msi": { "version": "0.1.0" },
+      "all": false,
+      "msi": {},
       "exe": {}
     }
   }

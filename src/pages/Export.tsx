@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { Button } from "@/components/Button";
-import { DEFAULT_EXPORT_OPTIONS, type ExportOptions } from "@/lib/models";
+import { DEFAULT_EXPORT_OPTIONS, type ExportOptions, type Project } from "@/lib/models";
 
 export default function ExportPage() {
   const project = useAppStore((s) => s.project);
@@ -20,7 +20,9 @@ export default function ExportPage() {
     );
   }
 
-  async function doExport(p: Project, format: "word" | "pdf") {
+  const p: Project = project;
+
+  async function doExport(format: "word" | "pdf") {
     try {
       const { tauri } = await import("@/lib/tauri");
       const bytes = format === "word"

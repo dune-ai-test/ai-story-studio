@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { Button } from "@/components/Button";
-import { Project, type Character } from "@/lib/models";
+import { Project } from "@/lib/models";
 
 const FIELDS = [
   ["name", "Name"], ["role", "Role"], ["age", "Age"], ["appearance", "Appearance"],

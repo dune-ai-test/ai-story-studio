@@ -1,5 +1,6 @@
 import { useProject } from "@/components/page-utils";
 import { Button } from "@/components/Button";
+import { type Project } from "@/lib/models";
 
 export default function HomePage() {
   const project = useProject();
@@ -51,7 +52,7 @@ function HomeHeader({ project }: { project: any }) {
 }
 
 /* ---------- Progress ---------- */
-function ProgressRow() {
+function ProgressRow({ project }: { project: Project }) {
   return (
     <div className="grid grid-cols-3 gap-4">
       <div className="flex items-center gap-4 rounded-md border border-ink-100 p-4">
@@ -352,7 +353,7 @@ function ComingDay({ day, tasks }: { day: string; tasks: string[] }) {
 }
 
 /* ---------- Scene Progress ---------- */
-const SCENES: Array<[string, string, string | boolean, string | boolean, string | boolean, string]> = [
+const SCENES: Array<[string, string, string | boolean, string | boolean, string | boolean, string | boolean]> = [
   ["01", "Return", true, true, true, true],
   ["02", "The House", true, true, true, true],
   ["03", "Photograph", true, true, true, true],

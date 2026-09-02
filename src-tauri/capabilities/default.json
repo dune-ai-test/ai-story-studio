@@ -20,7 +20,6 @@
     "dialog:default",
     "dialog:allow-open",
     "dialog:allow-save",
-    "http:default",
     "shell:default",
     "store:default"
   ]

@@ -12,7 +12,7 @@ publish = false
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = ["dialog"] }
+tauri = { version = "2", features = [] }
 tauri-plugin-fs = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-shell = "2"

@@ -3,14 +3,7 @@
   "productName": "AI Story Writing Studio",
   "version": "0.1.0",
   "identifier": "studio.storywrite.app",
-  "description": "An AI-assisted written-story creation studio.",
-  "authors": ["StoryStudio"],
-  "license": "",
-  "repository": "",
-  "homepage": "",
-  "rustVersion": "1.77",
   "build": {
-    "frontendDir": "../src",
     "frontendDist": "../dist"
   },
   "app": {
@@ -23,42 +16,14 @@
         "minHeight": 640,
         "resizable": true,
         "fullscreen": false,
-        "decorations": true,
-        "focus": true,
-        "visible": true,
-        "skipTaskbar": false,
         "theme": "Light",
         "hiddenTitle": true,
         "titleBarStyle": "Overlay"
       }
-    ],
-    "security": {
-      "csp": null
-    }
+    ]
   },
   "bundle": {
     "active": true,
-    "targets": {
-      "all": false,
-      "msi": {
-        "version": "0.1.0",
-        "languages": ["en-US"],
-        "installerIcon": null,
-        "productIcon": null,
-        "upgradeId": "studio.storywrite.app",
-        "helpUrl": null,
-        "license": null,
-        "manufacturer": "StoryStudio",
-        "appUserModelId": "studio.storywrite.app"
-      },
-      "exe": {
-        "signing": null
-      }
-    },
-    "icon": [
-      "icons/icon.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
-    ]
+    "targets": ["msi", "exe"]
   }
 }

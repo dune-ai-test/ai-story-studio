@@ -65,7 +65,7 @@ export default function ExportPage() {
         <div className="rounded-md border border-ink-100 p-4">
           <div className="text-sm font-semibold text-ink-900">Microsoft Word</div>
           <div className="mt-1 text-xs text-ink-500">.docx — opens in Microsoft Word or any word processor.</div>
-          <Button variant="primary" className="mt-3 w-full" onClick={() => doExport(p, "word")}>Download Word</Button>
+          <Button variant="primary" className="mt-3 w-full" onClick={() => doExport("word")}>Download Word</Button>
         </div>
         <div className="rounded-md border border-ink-100 p-4">
           <div className="text-sm font-semibold text-ink-900">PDF</div>

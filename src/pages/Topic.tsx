@@ -5,7 +5,6 @@ import { Button } from "@/components/Button";
 
 export default function TopicPage() {
   const create = useAppStore((s) => s.createProject);
-  const create = useAppStore((s) => s.createProject);
   const navigate = useAppStore((s) => s.navigate);
   const [text, setText] = useState(
     "A detective returns to her hometown after twenty years and discovers that her childhood friend disappeared under mysterious circumstances."

@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { Button } from "@/components/Button";
-import { Project } from "@/lib/models";
+import { Project, type SceneStatus } from "@/lib/models";
+
+const NEW_SCENE_STATUS: SceneStatus = "NotStarted";
 
 export default function ScenesPage() {
   const project = useAppStore((s) => s.project);
@@ -36,7 +38,7 @@ export default function ScenesPage() {
     const id = crypto.randomUUID();
     const updated = {
       ...p,
-      scenes: [...p.scenes, { id, number: p.scenes.length + 1, title: `Scene ${p.scenes.length + 1}`, location: null, time: null, characters: [], purpose: null, conflict: null, mood: null, story_beat: null, writing: "", dialogue: [], captions: [], status: "NotStarted" }],
+      scenes: [...p.scenes, { id, number: p.scenes.length + 1, title: `Scene ${p.scenes.length + 1}`, location: null, time: null, characters: [], purpose: null, conflict: null, mood: null, story_beat: null, writing: "", dialogue: [], captions: [], status: NEW_SCENE_STATUS }],
     };
     setProject(updated);
     autosave(updated);

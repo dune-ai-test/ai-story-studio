@@ -25,9 +25,10 @@ export default function StoryPage() {
   const pushToast = useAppStore((s) => s.pushToast);
 
   if (!project) return null;
+  const p = project;
 
   function update(field: string, value: string) {
-    const updated = { ...project, [field]: value };
+    const updated = { ...p, [field]: value };
     setProject(updated);
     autosave(updated);
   }
@@ -52,7 +53,7 @@ export default function StoryPage() {
           <EditableSection
             key={s.key}
             label={s.label}
-            value={(project as any)[s.key] ?? ""}
+            value={(p as any)[s.key] ?? ""}
             onChange={(v) => update(s.key, v)}
             onAi={applyAi}
           />
@@ -66,11 +67,11 @@ export default function StoryPage() {
             <EditableSection
               key={a.key}
               label={a.label}
-              value={(project.story_arc as any)[a.key] ?? ""}
+              value={(p.story_arc as any)[a.key] ?? ""}
               onChange={(v) => {
                 const updated = {
-                  ...project,
-                  story_arc: { ...project.story_arc, [a.key]: v },
+                  ...p,
+                  story_arc: { ...p.story_arc, [a.key]: v },
                 };
                 setProject(updated);
                 autosave(updated);

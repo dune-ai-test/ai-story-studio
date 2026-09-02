@@ -52,7 +52,7 @@ function HomeHeader({ project }: { project: any }) {
 }
 
 /* ---------- Progress ---------- */
-function ProgressRow({ project }: { project: Project }) {
+function ProgressRow() {
   return (
     <div className="grid grid-cols-3 gap-4">
       <div className="flex items-center gap-4 rounded-md border border-ink-100 p-4">

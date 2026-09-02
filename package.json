@@ -1,0 +1,48 @@
+{
+  "name": "ai-story-studio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@11.13.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "lint": "eslint . --ext ts,tsx",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@tiptap/core": "^2.10",
+    "@tiptap/extension-bold": "^2.10",
+    "@tiptap/extension-heading": "^2.10",
+    "@tiptap/extension-italic": "^2.10",
+    "@tiptap/extension-link": "^2.10",
+    "@tiptap/extension-paragraph": "^2.10",
+    "@tiptap/extension-quote": "^2.10",
+    "@tiptap/extension-strike": "^2.10",
+    "@tiptap/extension-text": "^2.10",
+    "@tiptap/react": "^2.10",
+    "@tiptap/extension-document": "^2.10",
+    "react": "^18.3",
+    "react-dom": "^18.3",
+    "react-router-dom": "^7.1",
+    "zustand": "^5.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.2",
+    "@types/react": "^18.3",
+    "@types/react-dom": "^18.3",
+    "@vitejs/plugin-react": "^4.3",
+    "autoprefixer": "^10.4",
+    "postcss": "^8.5",
+    "tailwindcss": "^3.4",
+    "typescript": "^5.6",
+    "vite": "^6.0",
+    "vite-tsconfig-paths": "^5.1",
+    "eslint": "^9.14",
+    "prettier": "^3.3"
+  }
+}

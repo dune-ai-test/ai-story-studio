@@ -1,0 +1,9 @@
+# Tauri capability file — minimal permissions for the MVP.
+# fs scope is restricted to the app's data dir via tauri.conf.json.
+# dialog is used for open/save file prompts during export.
+# http is used for LLM API calls.
+
+version = "v1"
+
+[permissions]
+default = ["core", "fs:default", "dialog:default", "http:default"]

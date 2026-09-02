@@ -1,0 +1,18 @@
+# Build artifacts
+src-tauri/target/
+dist/
+node_modules/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Env
+.env
+.env.local
+
+# App data (local project files)
+projects/
+versions/

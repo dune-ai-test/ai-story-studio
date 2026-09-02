@@ -15,7 +15,6 @@
         "minWidth": 960,
         "minHeight": 640,
         "resizable": true,
-        "fullscreen": false,
         "theme": "Light",
         "hiddenTitle": true,
         "titleBarStyle": "Overlay"
@@ -23,11 +22,6 @@
     ]
   },
   "bundle": {
-    "active": true,
-    "targets": {
-      "all": false,
-      "msi": {},
-      "exe": {}
-    }
+    "active": true
   }
 }

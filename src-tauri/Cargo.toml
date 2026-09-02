@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "An AI-assisted written-story creation studio."
 authors = ["StoryStudio"]
 edition = "2021"
-rust-version = "1.77"
+rust-version = "1.82"
 build = "build.rs"
 publish = false
 
@@ -25,7 +25,6 @@ uuid = { version = "1", features = ["v4"] }
 chrono = { version = "0.4", features = ["serde"] }
 anyhow = "1"
 thiserror = "1"
-docx = "1"
 printpdf = "0.7"
 open = "5"
 zip = "0.6"

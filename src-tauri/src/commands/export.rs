@@ -1,7 +1,7 @@
 //! Export Tauri commands: Word (.docx), PDF, plain text, markdown.
 //!
 //! Export is fully offline — no external Office dependency on the user's
-//! machine. Word uses the `docx` crate; PDF uses `printpdf`.
+//! machine. Word is built manually via the `zip` crate; PDF uses `printpdf`.
 
 use crate::models::{Project, ExportOptions};
 use crate::commands::export_gen;

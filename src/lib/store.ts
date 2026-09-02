@@ -4,7 +4,6 @@
 //! All mutations go through Tauri commands (see `lib/tauri.ts`).
 
 import { create } from "zustand";
-import { devtools } from "zustand/middleware";
 import { TauriApi } from "@/lib/tauri";
 import { Project } from "@/lib/models";
 
@@ -77,8 +76,7 @@ export interface Toast {
 let toastId = 0;
 const newToastId = () => `toast-${++toastId}`;
 
-export const useAppStore = create<AppState>()(
-  devtools((set, get) => ({
+export const useAppStore = create<AppState>((set, get) => ({
     project: null,
     projectId: null,
     loading: false,
@@ -193,5 +191,5 @@ export const useAppStore = create<AppState>()(
         throw e;
       }
     },
-  }))
+  })
 );

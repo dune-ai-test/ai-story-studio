@@ -16,9 +16,17 @@ export default function CharactersPage() {
   const pushToast = useAppStore((s) => s.pushToast);
   const [selected, setSelected] = useState<string | null>(project?.characters[0]?.id ?? null);
 
-  if (!project) return null;
-
-  const selectedChar = project.characters.find((c) => c.id === selected);
+  if (!project) {
+    return (
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">Build your characters</h1>
+        <p className="mt-1 text-sm text-ink-500">Create and refine the cast.</p>
+        <div className="mt-6 rounded-md border border-dashed border-ink-200 p-8 text-center text-sm text-ink-400">
+          No project selected.
+        </div>
+      </div>
+    );
+  }
 
   function addCharacter() {
     const id = crypto.randomUUID();
@@ -52,6 +60,18 @@ export default function CharactersPage() {
     setSelected(null);
   }
 
+  function duplicateCharacter(id: string) {
+    const src = project.characters.find((c) => c.id === id);
+    if (!src) return;
+    const copy = { ...src, id: crypto.randomUUID(), name: `${src.name} (copy)` };
+    const updated = { ...project, characters: [...project.characters, copy] };
+    setProject(updated);
+    autosave(updated);
+    pushToast({ type: "success", message: "Character duplicated." });
+  }
+
+  const selectedChar = project.characters.find((c) => c.id === selected);
+
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
@@ -72,16 +92,31 @@ export default function CharactersPage() {
           </div>
           <div className="p-1">
             {project.characters.map((c) => (
-              <button
-                key={c.id}
-                onClick={() => setSelected(c.id)}
-                className={`flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm hover:bg-ink-50 ${
-                  selected === c.id ? "bg-accent-soft text-accent" : "text-ink-700"
-                }`}
-              >
-                <span>{c.name}</span>
-                {c.role && <span className="text-xs text-ink-400">{c.role}</span>}
-              </button>
+              <div key={c.id} className="group flex items-center rounded-md hover:bg-ink-50">
+                <button
+                  onClick={() => setSelected(c.id)}
+                  className={`flex-1 rounded-md px-2 py-1.5 text-sm hover:bg-ink-50 ${
+                    selected === c.id ? "bg-accent-soft text-accent" : "text-ink-700"
+                  }`}
+                >
+                  <span>{c.name}</span>
+                  {c.role && <span className="ml-2 text-xs text-ink-400">{c.role}</span>}
+                </button>
+                <button
+                  onClick={() => duplicateCharacter(c.id)}
+                  className="px-1 py-1.5 text-xs text-ink-400 opacity-0 group-hover:opacity-100 hover:text-ink-700"
+                  title="Duplicate"
+                >
+                  Duplicate
+                </button>
+                <button
+                  onClick={() => deleteCharacter(c.id)}
+                  className="px-1 py-1.5 text-xs text-red-600 opacity-0 group-hover:opacity-100 hover:bg-red-50"
+                  title="Delete"
+                >
+                  Delete
+                </button>
+              </div>
             ))}
             {project.characters.length === 0 && (
               <div className="p-4 text-center text-xs text-ink-400">No characters yet.</div>
@@ -113,12 +148,12 @@ function CharacterEditor({
   character: any; onChange: (f: string, v: string) => void; onDelete: () => void;
 }) {
   return (
-    <div>
+    <div className="rounded-md border border-ink-100 p-4">
       <div className="mb-3 flex items-center justify-between">
         <input
           value={character.name}
           onChange={(e) => onChange("name", e.target.value)}
-          className="w-full rounded-md border-0 bg-transparent text-lg font-semibold text-ink-900 outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+          className="w-full bg-transparent text-lg font-semibold text-ink-900 outline-none focus:border-accent focus:ring-1 focus:ring-accent"
         />
         <Button variant="ghost" onClick={onDelete} className="ml-2 text-red-600">Delete</Button>
       </div>

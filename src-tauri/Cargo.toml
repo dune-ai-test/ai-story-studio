@@ -25,9 +25,10 @@ uuid = { version = "1", features = ["v4"] }
 chrono = { version = "0.4", features = ["serde"] }
 anyhow = "1"
 thiserror = "1"
-docx = "0.4"
+docx = "1"
 printpdf = "0.7"
 open = "5"
+zip = "0.6"
 dirs = "5"
 
 [dev-dependencies]

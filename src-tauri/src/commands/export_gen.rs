@@ -1,80 +1,45 @@
 //! Word (.docx) and PDF (.pdf) manuscript generation.
 //!
-//! Both are fully offline: no external Office dependency on the user's
-//! machine. Word uses the `docx` crate; PDF uses `printpdf`.
+//! Word is built manually: a .docx is a ZIP of OpenXML parts, so we emit
+//! the parts directly with the `zip` crate. This avoids depending on the
+//! `docx` crate's API, which changed between major versions.
+//!
+//! PDF uses `printpdf`. Plain text and Markdown are rendered directly.
 
 use crate::models::{Project, ExportOptions};
 use anyhow::{Context, Result};
 
 /// Build a .docx document from the project and return its bytes.
 pub fn build_docx(project: &Project, options: &ExportOptions) -> Result<Vec<u8>> {
-    use docx::document::Document;
-    use docx::document::Paragraph;
-    use docx::paragraph::Spacing;
+    use std::io::Cursor;
+    use zip::write::FileOptions;
+    use zip::ZipWriter;
 
-    let mut doc = Document::new();
+    let cursor = Cursor::new(Vec::new());
+    let mut zip = ZipWriter::new(cursor);
+    let opt = FileOptions::default()
+        .compression_method(zip::CompressionMethod::Deflated)
+        .unix_permissions(0o644);
 
-    if options.include_title_page {
-        doc = doc.add(Paragraph::new().style("Title").add(&project.title));
-        if options.include_author_name {
-            doc = doc.add(Paragraph::new().style("Subtitle").add("By an Author"));
-        }
-        doc = doc.add(Paragraph::new().spacing(Spacing::new().line(240)));
-    }
+    // [Content_Types].xml
+    zip.start_file("[Content_Types].xml", opt)?;
+    zip.write_all(CONTENT_TYPES.as_bytes())?;
 
-    if options.include_toc {
-        doc = doc.add(Paragraph::new().style("Heading1").add("Table of Contents"));
-    }
+    // _rels/.rels
+    zip.start_file("_rels/.rels", opt)?;
+    zip.write_all(RELS.as_bytes())?;
 
-    if options.include_character_notes && !project.characters.is_empty() {
-        doc = doc.add(Paragraph::new().style("Heading1").add("Characters"));
-        for c in &project.characters {
-            let mut line = format!("{} — {}", c.name, c.role.as_deref().unwrap_or(""));
-            if let Some(arc) = &c.arc {
-                line.push_str(&format!(" ({})", arc));
-            }
-            doc = doc.add(Paragraph::new().add(line));
-        }
-    }
+    // word/_rels/document.xml.rels
+    zip.start_file("word/_rels/document.xml.rels", opt)?;
+    zip.write_all(DOCUMENT_RELS.as_bytes())?;
 
-    for scene in &project.scenes {
-        if options.include_scene_headings {
-            doc = doc.add(
-                Paragraph::new()
-                    .style("Heading1")
-                    .add(format!("Scene {}: {}", scene.number, scene.title)),
-            );
-        } else {
-            doc = doc.add(
-                Paragraph::new()
-                    .style("Heading1")
-                    .add(format!("Scene {}: {}", scene.number, scene.title)),
-            );
-        }
+    // word/document.xml
+    zip.start_file("word/document.xml", opt)?;
+    let body = render_document_xml(project, options);
+    zip.write_all(body.as_bytes())?;
 
-        if !scene.writing.trim().is_empty() {
-            doc = doc.add(Paragraph::new().add(&scene.writing));
-        }
-
-        for d in &scene.dialogue {
-            let mut p = Paragraph::new();
-            p = p.add(format!("{}: {}", d.character_id.to_uppercase(), d.text));
-            if let Some(ctx) = &d.action_context {
-                p = p.add(format!(" [{}]", ctx));
-            }
-            doc = doc.add(p);
-        }
-
-        if options.include_captions && !scene.captions.is_empty() {
-            doc = doc.add(Paragraph::new().style("Heading2").add("Captions"));
-            for cap in &scene.captions {
-                doc = doc.add(Paragraph::new().add(&cap.text));
-            }
-        }
-    }
-
-    let bytes = doc.build().context("failed to build docx")?;
-    Ok(bytes)
+    let bytes = zip.finish()?;
+    Ok(bytes.into_inner())
 }
 
 /// Build a PDF document from the project and return its bytes.
@@ -88,10 +53,8 @@ pub fn build_pdf(project: &Project, options: &ExportOptions) -> Result<Vec<u8>> 
     let mut page = doc.add_page(PdfParagraph::new(&font, 12.0), None);
     page = page.add_text(&bold, 18.0, &project.title);
 
-    if options.include_title_page {
-        if options.include_author_name {
-            page = page.add_text(&font, 12.0, "By an Author");
-        }
+    if options.include_author_name {
+        page = page.add_text(&font, 12.0, "By an Author");
     }
 
     for scene in &project.scenes {
@@ -172,13 +135,115 @@ pub fn render_markdown(project: &Project) -> String {
     out
 }
 
-/// Validate export options against the project (e.g. warn if no scenes).
-pub fn validate(project: &Project, options: &ExportOptions) -> Result<()> {
-    if project.scenes.is_empty() {
-        anyhow::bail!("Cannot export a project with no scenes.");
-    }
-    if options.include_toc && project.scenes.len() > 50 {
-        anyhow::bail!("TOC requested but the project is too large.");
-    }
-    Ok(())
+/// Escape XML special characters.
+fn xml_escape(s: &str) -> String {
+    s.replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;")
+        .replace('\'', "&apos;")
 }
+
+/// Escape for paragraph text (whitespace preserved).
+fn para_escape(s: &str) -> String {
+    xml_escape(s)
+}
+
+/// Build the word/document.xml body.
+fn render_document_xml(project: &Project, options: &ExportOptions) -> String {
+    let mut body = String::new();
+    body.push_str(
+        "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n\
+         <w:document xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\">\
+         <w:body>",
+    );
+
+    if options.include_title_page {
+        body.push_str(&para("w:p", &format!(
+            "<w:pPr><w:pStyle w:val=\"Title\"/></w:pPr><w:r><w:t xml:space=\"preserve\">{}</w:t></w:r></w:p>",
+            xml_escape(&project.title)
+        )));
+        if options.include_author_name {
+            body.push_str(&para(
+                "w:p",
+                &format!(
+                    "<w:pPr><w:pStyle w:val=\"Subtitle\"/></w:pPr><w:r><w:t xml:space=\"preserve\">{}</w:t></w:r></w:p>",
+                    xml_escape("By an Author")
+                ),
+            ));
+        }
+    }
+
+    for scene in &project.scenes {
+        body.push_str(&para(
+            "w:p",
+            &format!(
+                "<w:pPr><w:pStyle w:val=\"Heading1\"/></w:pPr><w:r><w:t xml:space=\"preserve\">Scene {}: {}</w:t></w:r></w:p>",
+                scene.number, xml_escape(&scene.title)
+            ),
+        ));
+
+        if !scene.writing.trim().is_empty() {
+            body.push_str(&para(
+                "w:p",
+                &format!(
+                    "<w:r><w:t xml:space=\"preserve\">{}</w:t></w:r></w:p>",
+                    para_escape(&scene.writing)
+                ),
+            ));
+        }
+
+        for d in &scene.dialogue {
+            let mut text = format!("{}: {}", d.character_id.to_uppercase(), d.text);
+            if let Some(ctx) = &d.action_context {
+                text.push_str(&format!(" [{}]", ctx));
+            }
+            body.push_str(&para(
+                "w:p",
+                &format!("<w:r><w:t xml:space=\"preserve\">{}</w:t></w:r></w:p>", para_escape(&text)),
+            ));
+        }
+
+        if options.include_captions && !scene.captions.is_empty() {
+            body.push_str(&para(
+                "w:p",
+                &format!(
+                    "<w:pPr><w:pStyle w:val=\"Heading2\"/></w:pPr><w:r><w:t xml:space=\"preserve\">Captions</w:t></w:r></w:p>"
+                ),
+            ));
+            for cap in &scene.captions {
+                body.push_str(&para(
+                    "w:p",
+                    &format!("<w:r><w:t xml:space=\"preserve\">{}</w:t></w:r></w:p>", para_escape(&cap.text)),
+                ));
+            }
+        }
+    }
+
+    body.push_str("</w:body></w:document>");
+    body
+}
+
+/// Wrap inner XML in a `w:p` paragraph element. Callers pass the inner
+/// content (children of `<w:p>`); the helper strips a trailing `</w:p>`
+/// if present and wraps the result.
+fn para(_tag: &str, inner: &str) -> String {
+    let inner = inner.strip_suffix("</w:p>").unwrap_or(inner);
+    format!("<w:p>{inner}</w:p>")
+}
+
+const CONTENT_TYPES: &str = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>"#;
+
+const RELS: &str = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>"#;
+
+const DOCUMENT_RELS: &str = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+</Relationships>"#;

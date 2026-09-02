@@ -1,61 +1,71 @@
 import { useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { Button } from "@/components/Button";
+import { Project } from "@/lib/models";
 
 export default function ScenesPage() {
   const project = useAppStore((s) => s.project);
   const setProject = useAppStore((s) => s.setProject);
   const autosave = useAppStore((s) => s.autosave);
-  const navigate = useAppStore((s) => s.navigate);
   const pushToast = useAppStore((s) => s.pushToast);
   const [selected, setSelected] = useState<string | null>(project?.scenes[0]?.id ?? null);
 
-  if (!project) return null;
+  if (!project) {
+    return (
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">Build your scenes</h1>
+        <p className="mt-1 text-sm text-ink-500">Break the story into structured scenes.</p>
+        <div className="mt-6 rounded-md border border-dashed border-ink-200 p-8 text-center text-sm text-ink-400">
+          No project selected.
+        </div>
+      </div>
+    );
+  }
 
-  function reorder(from: number, to: number) {
-    const scenes = [...project.scenes];
+  function reorder(p: Project, from: number, to: number) {
+    const scenes = [...p.scenes];
     const [moved] = scenes.splice(from, 1);
     scenes.splice(to, 0, moved);
     const updated = scenes.map((s, i) => ({ ...s, number: i + 1 }));
-    const proj = { ...project, scenes: updated };
+    const proj = { ...p, scenes: updated };
     setProject(proj);
     autosave(proj);
   }
 
-  function addScene() {
+  function addScene(p: Project) {
     const id = crypto.randomUUID();
     const updated = {
-      ...project,
-      scenes: [...project.scenes, { id, number: project.scenes.length + 1, title: `Scene ${project.scenes.length + 1}`, location: null, time: null, characters: [], purpose: null, conflict: null, mood: null, story_beat: null, writing: "", dialogue: [], captions: [], status: "NotStarted" }],
+      ...p,
+      scenes: [...p.scenes, { id, number: p.scenes.length + 1, title: `Scene ${p.scenes.length + 1}`, location: null, time: null, characters: [], purpose: null, conflict: null, mood: null, story_beat: null, writing: "", dialogue: [], captions: [], status: "NotStarted" }],
     };
     setProject(updated);
     autosave(updated);
     setSelected(id);
   }
 
-  function updateScene(id: string, field: string, value: any) {
+  function updateScene(p: Project, id: string, field: string, value: any) {
     const updated = {
-      ...project,
-      scenes: project.scenes.map((s) => (s.id === id ? { ...s, [field]: value } : s)),
+      ...p,
+      scenes: p.scenes.map((s) => (s.id === id ? { ...s, [field]: value } : s)),
     };
     setProject(updated);
     autosave(updated);
   }
 
-  function deleteScene(id: string) {
+  function deleteScene(p: Project, id: string) {
     const updated = {
-      ...project,
-      scenes: project.scenes.filter((s) => s.id !== id).map((s, i) => ({ ...s, number: i + 1 })),
+      ...p,
+      scenes: p.scenes.filter((s) => s.id !== id).map((s, i) => ({ ...s, number: i + 1 })),
     };
     setProject(updated);
     autosave(updated);
     setSelected(null);
   }
 
-  function duplicateScene(id: string) {
-    const src = project.scenes.find((s) => s.id === id)!;
-    const copy = { ...src, id: crypto.randomUUID(), number: project.scenes.length + 1, title: `${src.title} (copy)` };
-    const updated = { ...project, scenes: [...project.scenes, copy].map((s, i) => ({ ...s, number: i + 1 })) };
+  function duplicateScene(p: Project, id: string) {
+    const src = p.scenes.find((s) => s.id === id)!;
+    const copy = { ...src, id: crypto.randomUUID(), number: p.scenes.length + 1, title: `${src.title} (copy)` };
+    const updated = { ...p, scenes: [...p.scenes, copy].map((s, i) => ({ ...s, number: i + 1 })) };
     setProject(updated);
     autosave(updated);
     pushToast({ type: "success", message: "Scene duplicated." });
@@ -71,7 +81,7 @@ export default function ScenesPage() {
           <p className="mt-1 text-sm text-ink-500">Break the story into structured scenes.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="secondary" onClick={addScene}>+ Add Scene</Button>
+          <Button variant="secondary" onClick={() => addScene(project)}>+ Add Scene</Button>
           <Button variant="secondary" onClick={() => pushToast({ type: "info", message: "Scene Agent — coming soon with an LLM key." })}>Develop Scene</Button>
         </div>
       </div>
@@ -88,10 +98,10 @@ export default function ScenesPage() {
                 scene={s}
                 selected={selected === s.id}
                 onSel={() => setSelected(s.id)}
-                onUp={() => i > 0 && reorder(i, i - 1)}
-                onDown={() => i < project.scenes.length - 1 && reorder(i, i + 1)}
-                onDup={() => duplicateScene(s.id)}
-                onDelete={() => deleteScene(s.id)}
+                onUp={() => i > 0 && reorder(project, i, i - 1)}
+                onDown={() => i < project.scenes.length - 1 && reorder(project, i, i + 1)}
+                onDup={() => duplicateScene(project, s.id)}
+                onDelete={() => deleteScene(project, s.id)}
               />
             ))}
             {project.scenes.length === 0 && (
@@ -102,7 +112,7 @@ export default function ScenesPage() {
 
         <div className="col-span-3">
           {selectedScene ? (
-            <SceneEditor scene={selectedScene} onChange={(f, v) => updateScene(selectedScene.id, f, v)} />
+            <SceneEditor scene={selectedScene} onChange={(f, v) => updateScene(project, selectedScene.id, f, v)} />
           ) : (
             <div className="flex h-full items-center justify-center rounded-md border border-dashed border-ink-200 p-12 text-center text-sm text-ink-400">
               Select a scene or add a new one.

@@ -8,14 +8,24 @@ export default function ExportPage() {
   const pushToast = useAppStore((s) => s.pushToast);
   const [options, setOptions] = useState<ExportOptions>(DEFAULT_EXPORT_OPTIONS);
 
-  if (!project) return null;
+  if (!project) {
+    return (
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">Export your story</h1>
+        <p className="mt-1 text-sm text-ink-500">Download your finished manuscript.</p>
+        <div className="mt-6 rounded-md border border-dashed border-ink-200 p-8 text-center text-sm text-ink-400">
+          No project selected.
+        </div>
+      </div>
+    );
+  }
 
-  async function doExport(format: "word" | "pdf") {
+  async function doExport(p: Project, format: "word" | "pdf") {
     try {
       const { tauri } = await import("@/lib/tauri");
       const bytes = format === "word"
-        ? await tauri.exportWord(project, options)
-        : await tauri.exportPdf(project, options);
+        ? await tauri.exportWord(p, options)
+        : await tauri.exportPdf(p, options);
 
       // Download the bytes via a Blob URL.
       const blob = new Blob([bytes as any], {
@@ -26,7 +36,7 @@ export default function ExportPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${project.title}.${format === "word" ? "docx" : "pdf"}`;
+      a.download = `${p.title}.${format === "word" ? "docx" : "pdf"}`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -53,12 +63,12 @@ export default function ExportPage() {
         <div className="rounded-md border border-ink-100 p-4">
           <div className="text-sm font-semibold text-ink-900">Microsoft Word</div>
           <div className="mt-1 text-xs text-ink-500">.docx — opens in Microsoft Word or any word processor.</div>
-          <Button variant="primary" className="mt-3 w-full" onClick={() => doExport("word")}>Download Word</Button>
+          <Button variant="primary" className="mt-3 w-full" onClick={() => doExport(p, "word")}>Download Word</Button>
         </div>
         <div className="rounded-md border border-ink-100 p-4">
           <div className="text-sm font-semibold text-ink-900">PDF</div>
           <div className="mt-1 text-xs text-ink-500">.pdf — opens in any PDF reader. No external software needed.</div>
-          <Button variant="secondary" className="mt-3 w-full" onClick={() => doExport("pdf")}>Download PDF</Button>
+          <Button variant="secondary" className="mt-3 w-full" onClick={() => doExport(p, "pdf")}>Download PDF</Button>
         </div>
       </div>
 
@@ -68,16 +78,16 @@ export default function ExportPage() {
           <Button variant="ghost" className="text-xs" onClick={async () => {
             try {
               const { tauri } = await import("@/lib/tauri");
-              const text = await tauri.exportPlainText(project);
-              download(text, `${project.title}.txt`, "text/plain");
+              const text = await tauri.exportPlainText(p);
+              download(text, `${p.title}.txt`, "text/plain");
               pushToast({ type: "success", message: "Plain text export ready." });
             } catch (e: any) { pushToast({ type: "error", message: e?.message ?? "Export failed." }); }
           }}>Plain Text</Button>
           <Button variant="ghost" className="text-xs" onClick={async () => {
             try {
               const { tauri } = await import("@/lib/tauri");
-              const text = await tauri.exportMarkdown(project);
-              download(text, `${project.title}.md`, "text/markdown");
+              const text = await tauri.exportMarkdown(p);
+              download(text, `${p.title}.md`, "text/markdown");
               pushToast({ type: "success", message: "Markdown export ready." });
             } catch (e: any) { pushToast({ type: "error", message: e?.message ?? "Export failed." }); }
           }}>Markdown</Button>

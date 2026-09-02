@@ -25,7 +25,6 @@ export default function HomePage() {
       <Queue />
       <NeedsAttention />
       <ComingUp />
-      <Pipeline />
       <SceneProgress />
       <AiActivity />
       <WritingActivity />
@@ -52,7 +51,7 @@ function HomeHeader({ project }: { project: any }) {
 }
 
 /* ---------- Progress ---------- */
-function ProgressRow({ project }: { project: any }) {
+function ProgressRow() {
   return (
     <div className="grid grid-cols-3 gap-4">
       <div className="flex items-center gap-4 rounded-md border border-ink-100 p-4">
@@ -353,7 +352,7 @@ function ComingDay({ day, tasks }: { day: string; tasks: string[] }) {
 }
 
 /* ---------- Scene Progress ---------- */
-const SCENES = [
+const SCENES: Array<[string, string, string | boolean, string | boolean, string | boolean, string]> = [
   ["01", "Return", true, true, true, true],
   ["02", "The House", true, true, true, true],
   ["03", "Photograph", true, true, true, true],

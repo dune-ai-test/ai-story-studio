@@ -27,8 +27,8 @@ pub fn get_config() -> Result<LlmConfig> {
 }
 
 /// Replace the current LLM config.
-pub fn set_config(config: LlmConfig) -> Result<()> {
-    *config().lock().unwrap() = config;
+pub fn set_config(new_config: LlmConfig) -> Result<()> {
+    *config().lock().unwrap() = new_config;
     Ok(())
 }
 
@@ -44,7 +44,7 @@ pub struct LlmClient {
 impl LlmClient {
     /// Build a client from the current global config.
     pub fn from_config() -> Self {
-        let cfg = CONFIG.lock().unwrap().clone();
+        let cfg = config().lock().unwrap().clone();
         Self {
             base_url: cfg.base_url,
             model: cfg.model,

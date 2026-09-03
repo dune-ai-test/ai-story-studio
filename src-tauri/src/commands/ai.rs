@@ -33,7 +33,20 @@ pub struct AgentResponse {
 /// Run a specific agent with the given request.
 async fn run_agent(kind: AgentKind, req: AgentRequest) -> AgentResponse {
     let client = llm::client_from_config();
-    agents::run(kind, &client, &req).await
+    // Convert the Tauri-facing AgentRequest into the internal agents::AgentRequest
+    let inner = crate::agents::AgentRequest {
+        project: req.project,
+        scene_id: req.scene_id,
+        user_input: req.user_input,
+        selection: req.selection,
+    };
+    let output = agents::run(kind, &client, &inner).await;
+    AgentResponse {
+        agent: output.agent,
+        summary: output.summary,
+        content: output.content,
+        stub: output.stub,
+    }
 }
 
 /// Story Agent — premise, theme, conflict, setting, story arc.

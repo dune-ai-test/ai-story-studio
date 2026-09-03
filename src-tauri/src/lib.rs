@@ -5,13 +5,14 @@
 //! all UI rendering. They communicate through the Tauri invoke commands
 //! registered below.
 
+mod agents;
 mod commands;
+mod llm;
 mod models;
 mod storage;
 
 use std::path::PathBuf;
 use std::sync::Mutex;
-use tauri::Manager;
 
 /// Application entry point.
 pub fn run() {
@@ -27,7 +28,8 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
-        .plugin(tauri_plugin_store::init())
+        .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_store::Builder::default().build())
         .manage(Mutex::new(store))
         .invoke_handler(tauri::generate_handler![
             greet,
